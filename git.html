@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>Git - 수정된 파일 올리기 명령어 모음</title>
+<style>
+    body {
+        font-family: "Arial", sans-serif;
+        background: #f5f7fa;
+        color: #333;
+        padding: 20px;
+        line-height: 1.6;
+    }
+    h1, h2 {
+        color: #1a1a1a;
+        border-left: 6px solid #4CAF50;
+        padding-left: 12px;
+    }
+    .card {
+        background: #fff;
+        padding: 18px 22px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
+    }
+    pre {
+        background: #2b2b2b;
+        color: #f8f8f2;
+        padding: 12px;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 14px;
+    }
+</style>
+</head>
+<body>
+
+<h1>Git 명령어 모음 – 수정된 파일 업로드</h1>
+
+<p>
+이 문서는 로컬에서 수정된 파일을 GitHub 원격 저장소에 업로드할 때 가장 많이 사용하는 명령어들을 정리한 가이드입니다.  
+모든 명령은 프로젝트 루트 디렉터리에서 실행합니다.
+</p>
+
+<div class="card">
+    <h2>1. 변경 사항 확인</h2>
+    <pre>git status</pre>
+    <p>어떤 파일이 수정되었는지, 추적되지 않은 파일이 무엇인지 확인합니다.</p>
+</div>
+
+<div class="card">
+    <h2>2. 수정된 파일 스테이징</h2>
+    <pre>git add 파일명</pre>
+    <p>특정 파일만 올리고 싶을 때 사용합니다.</p>
+
+    <pre>git add .</pre>
+    <p>변경된 모든 파일을 스테이징 영역에 추가합니다.</p>
+</div>
+
+<div class="card">
+    <h2>3. 커밋 생성</h2>
+    <pre>git commit -m "수정 내용 설명"</pre>
+    <p>수정한 내용을 메시지로 기록하여 하나의 커밋을 만듭니다.</p>
+</div>
+
+<div class="card">
+    <h2>4. 원격 저장소로 푸시</h2>
+    <pre>git push</pre>
+    <p>현재 사용 중인 브랜치 이름이 origin에 이미 연결되어 있다면 push만 입력하면 됩니다.</p>
+
+    <pre>git push -u origin main</pre>
+    <p>초기 1회, 혹은 새로운 브랜치 최초 push 시 사용합니다.</p>
+</div>
+
+<div class="card">
+    <h2>5. 전체 작업 흐름 (가장 많이 사용)</h2>
+    <pre>
+git status
+git add .
+git commit -m "update: 수정된 파일 업로드"
+git push
+    </pre>
+</div>
+
+<div class="card">
+    <h2>6. 파일 삭제 후 반영할 때</h2>
+    <pre>
+git rm 파일명
+git commit -m "remove: 파일 삭제"
+git push
+    </pre>
+</div>
+
+<div class="card">
+    <h2>7. 이름 변경/이동한 파일 반영</h2>
+    <pre>
+git mv 기존파일 새파일
+git commit -m "rename: 파일 이름 변경"
+git push
+    </pre>
+</div>
+
+<div class="card">
+    <h2>8. 실수했을 때 복구</h2>
+    <pre>git restore 파일명</pre>
+    <p>수정한 파일을 커밋 이전 상태로 되돌립니다.</p>
+
+    <pre>git reset --hard HEAD</pre>
+    <p>모든 변경 사항을 제거하고 최근 커밋 상태로 되돌립니다(주의!).</p>
+</div>
+
+</body>
+</html>
