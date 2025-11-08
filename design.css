@@ -1,0 +1,33 @@
+h1{
+    color:yellow;
+    font-size:24px;
+     font-weight:bold;
+     font-style:italic;
+     text-align:center;
+
+     text-decoration: dashed;
+}
+h3{
+color:blue;
+font-size:10px;
+
+
+}
+.box{
+background-color:red;
+background-repeat : no-repeat;
+border :2px solid black;
+border-radius :2px;
+
+padding : 2px 3px 2px 3px;
+
+margin :20px 30px 20px 30px;
+}
+
+
+
+#id{
+
+
+
+}

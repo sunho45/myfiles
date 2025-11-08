@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>linux.html</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0f172a;        /* slate-900 */
+      --panel:#111827;     /* gray-900 */
+      --text:#e5e7eb;      /* gray-200 */
+      --muted:#9ca3af;     /* gray-400 */
+      --accent:#22d3ee;    /* cyan-400 */
+      --card:#1f2937;      /* gray-800 */
+      --border:#333;
+    }
+
+    /* ===== 상단 고정 Status Window ===== */
+    .status-window{
+      position: sticky; top: 0; z-index: 1000;
+      margin: 0; padding: 12px 16px;
+      background: linear-gradient(180deg, var(--panel), var(--card));
+      color: var(--text);
+      display: flex; gap: 16px; align-items: center;
+      border-bottom: 1px solid #2b2b2b;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
+    .status-dot{ width:10px; height:10px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+    .status-title{ font-weight:700; letter-spacing: .2px; }
+    .status-sub{ color: var(--muted); font-size: 12px; }
+
+    /* ===== 페이지 기본 ===== */
+    body{
+      margin:0; padding:24px; background: var(--bg); color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", Arial, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI Emoji", "Segoe UI Symbol";
+      line-height: 1.6;
+    }
+    h1, h2, h3{ margin: 24px 0 12px; }
+    hr{ border: none; height:1px; background:#2b2b2b; margin: 24px 0; }
+    code, kbd{ background:#0b1220; padding: 2px 6px; border-radius: 6px; border: 1px solid #1f2a44; }
+
+    /* ===== 표 공통 ===== */
+    table{
+      width: 100%;
+      border-collapse: collapse;      /* 선 겹침 제거(선명도 ↑) */
+      background: var(--card);
+      border: 2px solid var(--border);/* 외곽선 진하게 */
+      margin: 12px 0 24px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td{
+      border: 1px solid var(--border);/* 내부 셀 경계선 */
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th{
+      background: #111827;
+    }
+    .note{ color: var(--muted); font-size: 14px; }
+
+    /* 리스트 */
+    ul, ol{ padding-left: 20px; }
+    li{ margin: 6px 0; }
+
+    /* 카드 섹션 */
+    .card{
+      background: var(--card);
+      border: 1px solid #2b2b2b;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+
+    /* 링크 */
+    a{ color: var(--accent); text-decoration: none; }
+    a:hover{ text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- Status Window -->
+  <div class="status-window">
+    <span class="status-dot"></span>
+    <div>
+      <div class="status-title">Linux Cheatsheet — 네트워크 & 기본 명령 정리</div>
+      <div class="status-sub">선명한 테이블 라인 · 오타/문법 수정 · 구조 개선</div>
+    </div>
+  </div>
+
+  <h1>Contents for Linux</h1>
+  <hr />
+
+  <h2>1) Basic Commands</h2>
+  <div class="card">
+    <ol>
+      <li><code>mkdir &lt;dir&gt;</code>: 디렉터리 생성 — 예) <code>mkdir directory</code></li>
+      <li><code>rmdir &lt;dir&gt;</code>: 비어있는 디렉터리 삭제</li>
+      <li><code>rm &lt;file&gt;</code>: 파일 삭제 — 예) <code>rm file.txt</code></li>
+      <li><code>cd &lt;path&gt;</code>: 디렉터리 이동 — 예) <code>cd /home/sunho</code></li>
+      <li><code>cp &lt;src&gt; &lt;dst&gt;</code>: 파일 복사 — 예) <code>cp file.txt file2.txt</code></li>
+      <li><code>mv &lt;src&gt; &lt;dst&gt;</code>: 파일/디렉터리 이동 또는 이름 변경 — 예) <code>mv ee.txt my.txt</code>, <code>mv file.txt /home/sunho/Documents/</code></li>
+      <li><code>chmod</code>: 권한 변경 — 예) <code>chmod u=rwx,g=rwx,o=rwx ee.txt</code><br />
+        <span class="note">숫자 표기: 읽기(4) + 쓰기(2) + 실행(1) → 예) 7(=4+2+1), 6(=4+2), 5(=4+1)</span>
+      </li>
+      <li><code>touch &lt;file&gt;</code>: 빈 파일 생성 또는 타임스탬프 갱신</li>
+      <li>
+        보기/편집:
+        <ul>
+          <li><code>cat &lt;file&gt;</code>: 파일 내용 보기</li>
+          <li><code>nano</code>: 간단한 터미널 편집기</li>
+          <li><code>vi</code> / <code>vim</code>: 고급 편집기 (Vim = Vi Improved)</li>
+        </ul>
+      </li>
+      <li>
+        목록 보기:
+        <ul>
+          <li><code>ls</code> / <code>ls -l</code>: 파일/디렉터리 목록(+권한/소유자 등)</li>
+        </ul>
+      </li>
+    </ol>
+  </div>
+
+  <hr />
+
+  <h2>2) 리눅스 기본 구조</h2>
+  <div class="card">
+    <p><strong>프로그램</strong> ⇄ <strong>Shell</strong> ⇄ <strong>Kernel</strong> ⇄ <strong>하드웨어</strong></p>
+    <h3>대표 디렉터리</h3>
+    <ul>
+      <li><code>/dev</code>: 장치 파일 (하드웨어 인터페이스)</li>
+      <li><code>/mnt</code>: 외부 장치 임시 마운트 지점</li>
+      <li><code>/usr</code>: 사용자 프로그램/라이브러리 등</li>
+      <li><code>/</code>: 루트(최상위) 디렉터리</li>
+      <li><code> /boot</code>부트 관련 디렉터리</li>
+       <li><code> /etc</code>변수,캐시파일이 들어있는 디렉터리</li>
+       <li><code> /bin</code>일반사용자나 시스템이 사용하는 명령어 모음</li>
+       <li><code> /home</code>일반사용자의 홈</li>
+       <li> <code>  /root</code>시스템 관리자의 홈</li>
+<li><code> /sbin</code>루트나 시스템관리자가 사용하는 명령어 모음</li>
+    </ul>
+  </div>
+
+  <hr />
+
+  <h2>3) dpkg(데비안 계열) 명령 표</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>명령어</th>
+        <th>설명</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>sudo dpkg -i package.deb</code></td>
+        <td>.deb 파일 설치</td>
+      </tr>
+      <tr>
+        <td><code>sudo dpkg -r package_name</code></td>
+        <td>설치된 패키지 제거(remove)</td>
+      </tr>
+      <tr>
+        <td><code>sudo dpkg -P package_name</code></td>
+        <td>완전 제거(purge, 설정파일 포함)</td>
+      </tr>
+      <tr>
+        <td><code>dpkg -l</code></td>
+        <td>설치된 모든 패키지 목록</td>
+      </tr>
+      <tr>
+        <td><code>dpkg -L package_name</code></td>
+        <td>해당 패키지가 설치한 파일 목록</td>
+      </tr>
+      <tr>
+        <td><code>dpkg -S /path/file</code></td>
+        <td>특정 파일이 어느 패키지에 속하는지 확인</td>
+      </tr>
+      <tr>
+        <td><code>dpkg -s package_name</code></td>
+        <td>패키지 상태(status) 확인</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr />
+
+  <h1>네트워크 관련 지식</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>용어</th>
+        <th>설명</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>DNS</td>
+        <td>도메인 이름을 IP 주소로 바꾸는 시스템/프로토콜</td>
+      </tr>
+      <tr>
+        <td>Gateway</td>
+        <td>외부 네트워크로 나가는 출입구(일반적으로 라우터)</td>
+      </tr>
+      <tr>
+        <td>MTU</td>
+        <td>한 번에 전송 가능한 최대 패킷 크기</td>
+      </tr>
+      <tr>
+        <td>Latency (RTT)</td>
+        <td>왕복 지연 시간. 요청→응답에 걸리는 시간</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr />
+
+  <h1>네트워크 관련 명령어</h1>
+  <div class="card">
+    <ul>
+      <li><strong>traceroute</strong>: 목적지까지의 경로를 hop 단위로 추적 — 예) <code>traceroute google.com</code></li>
+      <li><strong>ping</strong>: 대상 호스트와의 연결/지연 확인 — 예) <code>ping 8.8.8.8</code></li>
+      <li><strong>ss</strong>: 소켓 상태 확인 — 예) <code>ss -tuln</code></li>
+      <li><strong>ip</strong>: 주소/링크/라우팅 관리 — 예) <code>ip addr</code>, <code>ip route</code></li>
+      <li><strong>dig</strong>/<strong>nslookup</strong>: DNS 질의 — 예) <code>dig A google.com</code></li>
+      <li><strong>tcpdump</strong>: 패킷 캡처 — 예) <code>sudo tcpdump -i any port 80</code></li>
+    </ul>
+    <p class="note">※ 일부 명령은 패키지 설치가 필요할 수 있습니다(예: <code>sudo apt install traceroute</code>).</p>
+  </div>
+
+</body><div id="netcast-cheatsheet" style="font-family:system-ui,Segoe UI,Apple SD Gothic Neo,Apple Color Emoji,Arial,sans-serif; line-height:1.55; color:#111; background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:20px; max-width:920px; margin:24px auto; box-shadow:0 6px 20px rgba(0,0,0,.06); position:relative;">
+  <!-- Status Window (상단 고정 카드 느낌) -->
+  <div style="position:sticky; top:0; z-index:2; background:#ffffffd9; backdrop-filter:saturate(1.2) blur(2px); border:1px solid #e5e7eb; border-radius:12px; padding:12px 14px; margin:-8px -8px 16px; display:flex; align-items:center; gap:12px;">
+    <div style="width:10px; height:10px; border-radius:999px; background:#10b981;"></div>
+    <div style="font-weight:700;">Network Cast Types — Quick Sheet</div>
+    <div style="margin-left:auto; font-size:12px; color:#6b7280;">Last updated: 2025-11-03</div>
+  </div>
+
+  <!-- 제목 -->
+  <h2 style="margin:8px 0 10px; font-size:22px;">유니캐스트 · 브로드캐스트 · 멀티캐스트 한눈 정리</h2>
+  <p style="margin:0 0 14px; color:#374151;">
+    “누구에게 보내는가” 기준의 전송 방식 요약. 예시와 주소 범위, 사용 프로토콜, 장단점을 함께 묶었습니다.
+  </p>
+
+  <!-- 개요 -->
+  <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin:10px 0 18px;">
+    <div style="border:1px solid #e5e7eb; border-radius:12px; padding:12px;">
+      <div style="font-weight:700; margin-bottom:6px;">Unicast</div>
+      <div style="font-size:13px; color:#4b5563;">1:1 통신 · 일반 호스트 ↔ 호스트</div>
+      <ul style="margin:8px 0 0 16px; padding:0; font-size:13px;">
+        <li>대상: 특정 단말 1대</li>
+        <li>예: HTTP, SSH, FTP</li>
+        <li>IP: 일반 호스트 주소</li>
+        <li>MAC: 대상 호스트 MAC</li>
+      </ul>
+    </div>
+    <div style="border:1px solid #e5e7eb; border-radius:12px; padding:12px;">
+      <div style="font-weight:700; margin-bottom:6px;">Broadcast</div>
+      <div style="font-size:13px; color:#4b5563;">1:모두 · 동일 서브넷 전체</div>
+      <ul style="margin:8px 0 0 16px; padding:0; font-size:13px;">
+        <li>대상: 같은 네트워크의 전 장비</li>
+        <li>예: ARP Request, DHCP Discover</li>
+        <li>IP: 255.255.255.255</li>
+        <li>MAC: FF:FF:FF:FF:FF:FF</li>
+      </ul>
+    </div>
+    <div style="border:1px solid #e5e7eb; border-radius:12px; padding:12px;">
+      <div style="font-weight:700; margin-bottom:6px;">Multicast</div>
+      <div style="font-size:13px; color:#4b5563;">1:그룹 · 가입자만 수신</div>
+      <ul style="margin:8px 0 0 16px; padding:0; font-size:13px;">
+        <li>대상: 특정 그룹(N개)</li>
+        <li>예: IPTV, 화상회의, 라우팅 프로토콜(OSPF)</li>
+        <li>IP: 224.0.0.0 ~ 239.255.255.255</li>
+        <li>MAC: 01:00:5E:xx:xx:xx</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 비교 표 -->
+  <div style="border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; margin:4px 0 16px;">
+    <div style="display:grid; grid-template-columns:160px 1fr 1fr 1fr; background:#f9fafb; font-weight:700; font-size:13px;">
+      <div style="padding:10px; border-right:1px solid #e5e7eb;">구분</div>
+      <div style="padding:10px; border-right:1px solid #e5e7eb;">Unicast</div>
+      <div style="padding:10px; border-right:1px solid #e5e7eb;">Broadcast</div>
+      <div style="padding:10px;">Multicast</div>
+    </div>
+    <div style="display:grid; grid-template-columns:160px 1fr 1fr 1fr; font-size:13px;">
+      <div style="padding:10px; border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb;">전송 대상</div>
+      <div style="padding:10px; border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb;">한 장치(1:1)</div>
+      <div style="padding:10px; border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb;">서브넷 모두(1:모두)</div>
+      <div style="padding:10px; border-top:1px solid #e5e7eb;">그룹 가입자(1:N)</div>
+
+      <div style="padding:10px; border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb;">효율성</div>
+      <div style="padding:10px; border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb;">수신자 많으면 N회 송신</div>
+      <div style="padding:10px; border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb;">불필요 수신 많음</div>
+      <div style="padding:10px; border-top:1px solid #e5e7eb;">그룹당 1회 송신으로 효율↑</div>
+
+      <div style="padding:10px; border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb;">라우터 통과</div>
+      <div style="padding:10px; border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb;">O</div>
+      <div style="padding:10px; border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb;">X (기본적으로 차단)</div>
+      <div style="padding:10px; border-top:1px solid #e5e7eb;">O (IGMP/PIM 필요)</div>
+
+      <div style="padding:10px; border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb;">대표 예시</div>
+      <div style="padding:10px; border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb;">HTTP, SSH, FTP</div>
+      <div style="padding:10px; border-top:1px solid #e5e7eb; border-right:1px solid #e5e7eb;">ARP Req, DHCP Discover</div>
+      <div style="padding:10px; border-top:1px solid #e5e7eb;">IPTV, OSPF, 온라인 세미나</div>
+    </div>
+  </div>
+
+  <!-- 주소/프로토콜 메모 -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <div style="border:1px solid #e5e7eb; border-radius:12px; padding:12px;">
+      <div style="font-weight:700; margin-bottom:6px;">주소 메모</div>
+      <ul style="margin:0 0 0 16px; padding:0; font-size:13px; color:#374151;">
+        <li><strong>브로드캐스트 MAC</strong>: FF:FF:FF:FF:FF:FF</li>
+        <li><strong>브로드캐스트 IP</strong>: 255.255.255.255</li>
+        <li><strong>멀티캐스트 IP</strong>: 224.0.0.0 ~ 239.255.255.255</li>
+        <li><strong>멀티캐스트 MAC</strong>: 01:00:5E:xx:xx:xx</li>
+      </ul>
+    </div>
+    <div style="border:1px solid #e5e7eb; border-radius:12px; padding:12px;">
+      <div style="font-weight:700; margin-bottom:6px;">현업에서 자주 등장</div>
+      <ul style="margin:0 0 0 16px; padding:0; font-size:13px; color:#374151;">
+        <li>Unicast: 대부분의 웹/백엔드 트래픽</li>
+        <li>Broadcast: ARP, DHCP(Discover/Offer)</li>
+        <li>Multicast: OSPF/VRRP/서비스 발견, IPTV/회의</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 한줄 요약 -->
+  <div style="margin-top:14px; padding:10px 12px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; font-size:13px;">
+    <strong>한 줄 요약:</strong> 
+    <span style="color:#111;">Unicast = 1:1, Broadcast = 같은 서브넷 모두, Multicast = 그룹 가입자만.</span>
+  </div>
+</div>
+</html>

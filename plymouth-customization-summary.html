@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ubuntu 부팅화면(Plymouth) 커스터마이징 정리</title>
+  <style>
+    :root{
+      --bg:#0b0e14;
+      --card:#11151c;
+      --muted:#98a2b3;
+      --text:#e6edf3;
+      --accent:#7c3aed;
+      --accent-2:#22c55e;
+      --code:#0f172a;
+      --border:#1f2937;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Noto Sans KR, Apple SD Gothic Neo, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"}
+    a{color:#a78bfa;text-decoration:none}
+    a:hover{text-decoration:underline}
+    .container{max-width:1100px;margin:120px auto 80px;padding:0 20px}
+    h1{font-size:2.2rem;margin:.2rem 0 1rem}
+    h2{font-size:1.5rem;margin:2rem 0 .75rem;border-left:4px solid var(--accent);padding-left:.6rem}
+    h3{font-size:1.1rem;margin:1.4rem 0 .4rem;color:#c7d2fe}
+    p,li{color:#d7dde6}
+    code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    pre{background:linear-gradient(180deg, #0b1020, #0a0f1b);border:1px solid var(--border);padding:14px;border-radius:10px;overflow:auto;box-shadow:var(--shadow)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));}
+    .kbd{display:inline-block;padding:2px 8px;border:1px solid var(--border);border-radius:6px;background:#0c1220;color:#e2e8f0}
+    ul{margin:0 0 1rem 1.2rem}
+    hr{border:0;border-top:1px solid var(--border);margin:24px 0}
+    .badge{display:inline-block;font-size:.75rem;padding:2px 8px;border:1px solid var(--border);border-radius:999px;background:#0e1322;color:#cbd5e1}
+    /* --- Status Window (fixed top card) --- */
+    .status-window{
+      position:fixed;top:16px;left:50%;transform:translateX(-50%);
+      width:min(1100px,94%);
+      backdrop-filter:saturate(1.2) blur(6px);
+      background:rgba(17,21,28,.85);
+      border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);
+      padding:14px 16px;z-index:99
+    }
+    .status-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .status-left{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--accent-2);box-shadow:0 0 0 3px rgba(34,197,94,.15)}
+    .status-title{font-weight:700}
+    .status-kv{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .kv{padding:6px 10px;border:1px solid var(--border);border-radius:10px;background:#0e1422}
+    .small{font-size:.85rem;color:#b6c2d0}
+    .btn{display:inline-block;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:#0f1423;color:#e5e7eb;text-decoration:none}
+    .btn:hover{background:#111a2d}
+    .hl{color:#a78bfa}
+  </style>
+</head>
+<body>
+  <!-- Status Window -->
+  <div class="status-window">
+    <div class="status-row">
+      <div class="status-left">
+        <span class="dot"></span>
+        <span class="status-title">Plymouth 커스터마이징 상태</span>
+        <span class="badge">현재 테마: <strong>mytheme</strong></span>
+        <span class="badge">GRUB: <code>quiet splash</code></span>
+      </div>
+      <div class="status-kv">
+        <span class="kv small">Initramfs 업데이트: <span class="hl">완료</span></span>
+        <span class="kv small">PNG 포맷: <span class="hl">확인</span></span>
+        <span class="kv small">BGRT: <span class="hl">비활성</span></span>
+        <a class="btn" href="#quick-check">빠른 점검</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+    <header>
+      <h1>Ubuntu 부팅화면(Plymouth) 커스터마이징 정리</h1>
+      <p class="small">직접 진행한 과정을 바탕으로 만든 실행 가이드 &amp; 문제 해결 모음</p>
+    </header>
+
+    <section class="card">
+      <h2>1. Plymouth 기본 구조</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>테마 폴더</h3>
+          <pre><code>/usr/share/plymouth/themes/&lt;테마이름&gt;/
+├─ mytheme.plymouth   # 설정 파일
+├─ mytheme.script     # 렌더링 스크립트
+├─ background.png     # 배경 (PNG)
+└─ logo.png           # 로고 (PNG)
+</code></pre>
+        </div>
+        <div class="card">
+          <h3>현재 테마 확인/선택</h3>
+          <pre><code>sudo update-alternatives --display default.plymouth
+sudo update-alternatives --config  default.plymouth
+</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2. 커스텀 테마 만들기</h2>
+      <h3>mytheme.plymouth</h3>
+      <pre><code>[Plymouth Theme]
+Name=MyTheme
+Description=My custom splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/mytheme
+ScriptFile=/usr/share/plymouth/themes/mytheme/mytheme.script
+</code></pre>
+
+      <h3>mytheme.script</h3>
+      <pre><code>wallpaper_image = Image("background.png");
+wallpaper_sprite = Sprite(wallpaper_image);
+wallpaper_sprite.SetZ(-100);
+
+logo_image = Image("logo.png");
+logo_sprite = Sprite(logo_image);
+logo_sprite.SetPosition(
+  Screen.Width/2 - logo_image.GetWidth()/2,
+  Screen.Height/2 - logo_image.GetHeight()/2
+);
+</code></pre>
+    </section>
+
+    <section class="card">
+      <h2>3. 이미지 요건 &amp; 변환</h2>
+      <ul>
+        <li>포맷: <strong>PNG</strong>만 사용 (JPG/GIF/WEBP 미지원)</li>
+        <li>크기: 1920×1080 또는 1920×1200 권장</li>
+        <li>대소문자 포함 정확한 파일명 필요 (<code>logo.png</code>)</li>
+      </ul>
+      <h3>JPEG → PNG 변환 (ImageMagick)</h3>
+      <pre><code>sudo apt install imagemagick -y
+convert input.jpg output.png
+file output.png    # 실제 PNG 포맷 확인
+</code></pre>
+    </section>
+
+    <section class="card">
+      <h2>4. 적용 절차</h2>
+      <pre><code># 1) 테마 등록/선택
+sudo update-alternatives --install \
+  /usr/share/plymouth/themes/default.plymouth default.plymouth \
+  /usr/share/plymouth/themes/mytheme/mytheme.plymouth 100
+sudo update-alternatives --config default.plymouth   # mytheme 선택
+
+# 2) initramfs 반영
+sudo update-initramfs -u
+
+# 3) 재부팅
+sudo reboot
+</code></pre>
+    </section>
+
+    <section class="card" id="quick-check">
+      <h2>5. 빠른 점검 (Troubleshooting)</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>BGRT(제조사 로고) 비활성화</h3>
+          <pre><code>sudo mv /usr/share/plymouth/themes/bgrt \
+         /usr/share/plymouth/themes/bgrt_backup
+sudo update-initramfs -u
+</code></pre>
+        </div>
+        <div class="card">
+          <h3>GRUB에 splash 적용</h3>
+          <pre><code>sudo nano /etc/default/grub
+# GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+sudo update-grub
+</code></pre>
+        </div>
+        <div class="card">
+          <h3>부팅 없이 미리보기</h3>
+          <pre><code>sudo plymouthd
+sudo plymouth --show-splash
+sleep 3
+sudo plymouth --quit
+</code></pre>
+        </div>
+        <div class="card">
+          <h3>모든 커널에 강제 반영</h3>
+          <pre><code>sudo update-initramfs -c -k all
+</code></pre>
+        </div>
+      </div>
+      <h3>자주 겪는 실수</h3>
+      <ul>
+        <li><code>plymouth</code> 철자 대신 <code>playmouth</code> 오타</li>
+        <li><code>.plymouth</code> 확장자 오타 (<code>.playmouth</code> 등)</li>
+        <li><code>sudo echo ... &gt; file</code> → 리다이렉션 권한 문제 (대신 <code>sudo tee</code> 사용)</li>
+        <li>PNG로 보이는 JPG (확인은 <code>file *.png</code>)</li>
+        <li><code>update-initramfs -u</code> 누락</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>6. 보너스: 간단한 페이드인 애니메이션</h2>
+      <pre><code>for (i = 0; i &lt;= 100; i++) {
+  logo_sprite.SetOpacity(i / 100.0);
+  Sleep(0.01);
+}
+</code></pre>
+    </section>
+
+    <footer style="opacity:.8;margin-top:40px">
+      <hr/>
+      <p>© 2025 Plymouth Custom Guide — 생성된 문서 (HTML)</p>
+    </footer>
+  </main>
+</body>
+</html>
