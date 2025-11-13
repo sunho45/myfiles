@@ -1,53 +1,40 @@
-#include <vector>
 #include <iostream>
 using namespace std;
-int main(){
-
-int N;
-cin>>N;
+#include <algorithm>
+#include <vector>
+#include <math.h>
+int main()
+{
+  int N;
+  cin>>N;
 vector<int> a(N);
+vector<int> b(N);
 for(int i=0;i<N;i++){
-cin>>a[i];
-
-
-
+  cin>>a.at(i);
 }
-int count=0;
-for(int i=0;i<a.size();i++){
+for(int i=0;i<N;i++){
+  cin>>b.at(i);
+}
+  sort(a.begin(),a.end());
+  sort(b.begin(),b.end(),greater<>());
+  int n=0;
+   for(int i=0;i<N;i++){
+    n+=a.at(i)*b.at(i);
+   } 
+
+   int nl=0;
+cout<<n<<endl;
+
+
+
+
+
+
     
-    int soshu=0;
-    bool issoshu= soshu==2;
-for(int j=1;j<=a[i];j++){
-    
-if(a[i]%j==0){
-
-    soshu++;
 }
 
-}
-if(issoshu){
-count++;
+/*
+dp[0]=1;
+dp[1]=1;
 
-}
-
-
-
-
-
-}
-
-
-
-
-
-cout<<count<<endl;
-
-
-
-
-
-
-
-
-
-}
+*/

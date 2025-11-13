@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "iostream": "cpp"
+        "*.embeddedhtml": "html",
+        "iostream": "cpp",
+        "algorithm": "cpp",
+        "random": "cpp"
     }
 }

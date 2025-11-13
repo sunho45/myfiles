@@ -1,552 +1,390 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>코드 고찰</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>STL 컨테이너 치트시트 · 세련 리팩터</title>
   <style>
-    pre code {
-      background: grey;
-      display: block;
-      padding: 10px;
-      
-
-      border-radius: 8px;
-      font-family: Consolas, "Courier New", monospace;
-      white-space: pre; /* 줄바꿈, 공백 그대로 유지 */
+    /* ===== CSS Variables & Theme ===== */
+    :root{
+      --bg: #0b0c10;
+      --panel: #111218;
+      --panel-2: #171821;
+      --text: #e8ecf1;
+      --muted: #aab3bf;
+      --brand: #7aa2ff;
+      --brand-2:#5bd1ff;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --code-bg:#0d1117;
+      --code-border:#1f2937;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f6f7fb; --panel:#ffffff; --panel-2:#f1f3f8; --text:#0c1117; --muted:#49586a; --brand:#2667ff; --brand-2:#0ea5e9; --code-bg:#0f172a; --code-border:#e5e7eb;
+        --shadow: 0 10px 20px rgba(0,0,0,.08);
+      }
     }
 
-    ol li{
-        font-style:bold;
-        font-size:20px;
-        background-color: black;
-    }
-    ul li{
-        font-style:bold;
-        font-size:20px;
-        background-color: black;
+    /* ===== Base ===== */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Inter, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;}
+    a{color:var(--brand);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .container{display:grid;grid-template-columns:260px 1fr;gap:22px;max-width:1200px;margin:120px auto 64px;padding:0 20px}
+    @media (max-width: 960px){.container{grid-template-columns:1fr}}
 
+    /* ===== Status Window (fixed top card) ===== */
+    .status-window{position:fixed;inset:16px 16px auto 16px;z-index:50;background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid rgba(124,139,164,.18);backdrop-filter: blur(6px);box-shadow:var(--shadow);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:14px}
+    .badge{padding:4px 10px;border-radius:999px;font-weight:600;background:rgba(122,162,255,.15);color:var(--brand);border:1px solid rgba(122,162,255,.35)}
+    .kvs{display:flex;flex-wrap:wrap;gap:10px;color:var(--muted);font-size:14px}
+    .kvs b{color:var(--text);margin-left:6px}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(34,197,94,.18)}
 
+    /* ===== Sidebar ===== */
+    aside{position:sticky;top:90px;height:fit-content;background:var(--panel);border:1px solid rgba(124,139,164,.18);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .aside-head{padding:18px 18px 8px;font-weight:700}
+    .toc{list-style:none;margin:0;padding:0 12px 12px}
+    .toc a{display:block;padding:10px 12px;border-radius:12px;color:var(--text)}
+    .toc a:hover{background:var(--panel-2)}
 
-    }
+    /* ===== Main ===== */
+    main{display:flex;flex-direction:column;gap:18px}
+    .card{background:var(--panel);border:1px solid rgba(124,139,164,.18);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .card h2,.card h3{margin:0;padding:18px 20px;border-bottom:1px solid rgba(124,139,164,.14)}
+    .card .content{padding:18px 20px}
 
+    /* Grid for method lists */
+    .grid{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:12px}
+    @media (max-width:780px){.grid{grid-template-columns:1fr}}
 
+    .pill{display:inline-flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid rgba(124,139,164,.18);padding:6px 10px;border-radius:12px}
+    .note{color:var(--muted);font-size:14px}
 
+    /* ===== Code ===== */
+    pre{margin:0}
+    pre code{display:block;background:var(--code-bg);color:#e2e8f0;border:1px solid var(--code-border);padding:14px;border-radius:14px;overflow:auto;font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    .codewrap{position:relative}
+    .copy{position:absolute;top:10px;right:10px;border:1px solid rgba(124,139,164,.35);background:var(--panel);color:var(--text);border-radius:10px;padding:6px 10px;font-size:12px;cursor:pointer}
+
+    /* Definition list styling for concise API refs */
+    dl{display:grid;grid-template-columns:180px 1fr;gap:10px 16px;margin:0}
+    dt{font-weight:700}
+    dd{margin:0;color:var(--muted)}
+
+    /* Inline kbd */
+    kbd{background:var(--panel-2);border:1px solid rgba(124,139,164,.25);border-bottom-width:3px;border-radius:8px;padding:2px 6px;font-family:inherit}
+
+    /* Small label */
+    .label{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid rgba(124,139,164,.25);color:var(--muted);font-size:12px}
   </style>
 </head>
 <body>
-  <h1>이번 코드에 대한 고찰</h1>
+  <!-- ===== Status Window (user preference) ===== -->
+  <section class="status-window" role="status" aria-live="polite">
+    <span class="dot" aria-hidden="true"></span>
+    <span class="badge">STL 치트시트</span>
+    <div class="kvs">
+      <span>상태<b>OK</b></span>
+      <span>빌드<b>Single‑File HTML</b></span>
+      <span>테마<b>자동(Light/Dark)</b></span>
+      <span>복사 버튼<b>지원</b></span>
+    </div>
+  </section>
 
-  <pre><code>
-#include &lt;iostream&gt;
+  <div class="container">
+    <aside>
+      <div class="aside-head">빠른 탐색</div>
+      <nav>
+        <ul class="toc">
+          <li><a href="#intro">개요</a></li>
+          <li><a href="#cpp-example">C++ 예제 & 주의점</a></li>
+          <li><a href="#queue">queue</a></li>
+          <li><a href="#stack">stack</a></li>
+          <li><a href="#pqueue">priority_queue</a></li>
+          <li><a href="#vector">vector</a></li>
+          <li><a href="#deque">deque</a></li>
+          <li><a href="#list">list</a></li>
+          <li><a href="#set">set</a></li>
+          <li><a href="#map">map</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main>
+      <!-- Intro -->
+      <section id="intro" class="card">
+        <h2>STL 컨테이너 핵심 치트시트</h2>
+        <div class="content">
+          <p class="note">자주 쓰는 멤버 함수만 콤팩트하게 정리했습니다. 각 섹션은 <span class="label">선언</span> · <span class="label">핵심 메서드</span> · <span class="label">비고</span> 순서로 구성됩니다.</p>
+        </div>
+      </section>
+
+      <!-- C++ Example -->
+      <section id="cpp-example" class="card">
+        <h2>C++ 예제 & 주의점 (소멸자 사용)</h2>
+        <div class="content">
+          <p><strong>문제:</strong> 지역 변수 <code>a</code>, <code>b</code>의 <em>주소</em>를 멤버 포인터가 가리키는데, 소멸자에서 <code>delete[]</code>로 해제하면 <b>정의되지 않은 동작</b>입니다.</p>
+          <div class="grid">
+            <div>
+              <p class="label">원본(문제 있는 버전)</p>
+              <div class="codewrap"><button class="copy" data-target="#bad">Copy</button>
+                <pre><code id="bad" class="language-cpp">#include &lt;iostream&gt;
 using namespace std;
 
 class dividess {
 public:
-    int *num1;
-    int *num2;
-
-    dividess(int *num1, int *num2) : num1(num1), num2(num2) {}
-
-    void print() {
-        cout &lt;&lt; (*num1) / (*num2) &lt;&lt; endl;
-    }
-
-    ~dividess() {
-        delete [] num1;
-        delete [] num2;
-    }
+    int* num1; int* num2;
+    dividess(int* n1, int* n2): num1(n1), num2(n2) {}
+    void print(){ cout &lt;&lt; (*num1) / (*num2) &lt;&lt; '\n'; }
+    ~dividess(){ delete[] num1; delete[] num2; } // ❌ 스택 변수 해제 금지
 };
 
-int main() {
-    int *num1;
-    int *num2;
-    int a, b;
-
-    cin >> a;
-    cin>> b;
-
-    num1 = &amp;a;
-    num2 = &amp;b;
-
-    dividess d(num1, num2);
+int main(){
+    int a, b; cin >> a >> b;
+    dividess d(&a, &b);
     d.print();
-}
-  </code></pre>
-
-  <p>
-    위 코드에서 <code>num1</code>과 <code>num2</code>는 스택 변수 <code>a</code>, <code>b</code>의 주소를 가리킵니다.
-    따라서 소멸자에서 <code>delete[]</code>로 해제하면 안 됩니다.
-  </p>
-
-  <h2>  <b>stlcontainer functionlist</b></h2>
-
-
-
-  <h3>queue</h3>
-  <ol>
-
-    <h4>declaration: queue<<type>> qu; </h4>
-
-    <li>
-      <p> queue.push(x) :원소 x를 추가</p>
-    </li>
-      <li>
-        queue.pop() :원소 x를 꺼내고 제거(단 return값이 없기에 front르 먼저꺼내야함)
-    </li>
-
-      <li>
-        queue.front() :큐 컨테이너 내에 있는 함수중에 앞에 있는 값을 반환한다
-    </li>
-
-      <li>
-        queue.back() :큐 컨테이너 내에 있는 함수중에 뒤에 있는 값을 반환한다
-    </li>
-
-      <li>
-        queue.size() :queue의 사이즈 반환
-    </li>
-
-      <li>
-        queue.empty():큐가 비었는지 확인
-        
-    </li>
-
-
-
-
-
-
-  </ol>
-
-<h3>stack</h3>
-<h4>  declaration: stack< int> st; </h4>
-<ul>
-    <li>
-        stack.push():stack에 값 추가;
-    </li>
-<li>
-stack.top():stack에있는 최우선 호출 대상을 호출함
-</li>
-<li>
-stack.pop():stack에있는 최우선 호출대상을 제거
-</li>
-<li>
-    stack.size():stack의 사이즈 int값을 반환
-</li>
-<li>
-    stack.empty():스택이 비었는지 안비었는지 알려줌 비었으면 true차있으면 false 반환
-</li>
-
-
-
-
-
-</ul>
-<hr>
-<h3>priority_queue<int> pq</h3>
-    <ol>
-        <li>
-
-                pq.push(x):원소 x를 집어넣음
-
-
-
-
-        </li>
-        <li>
-            pq.pop():최우선 값을 제거 이것도 리턴값이 없음
-        </li>
-        <li>
-            pq.top():최우선에 있는 값을 반환
-        </li>
-
-        <li>
-    pq.size():stack의 사이즈 int값을 반환
-</li>
-<li>
-    pq.empty():스택이 비었는지 안비었는지 알려줌 비었으면 true차있으면 false 반환
-</li> 
-
-<li>
-
-    일반적으로 우선순위 큐는 최대합으로 운영되기에 최소로 바꿀려면
-    <br>
-    priority_queue<int,vector<int>,greater<int>> pq=로 바꿔준다.
-</li>
-
-
-
-
-    </ol>
-<hr>
-
-<h3>vector 함수</h3>
-declaration:vector<int> vec(n,val);
-  n은 크기, val은 어떤값을 채워놓을지에대해서
-<ol>
-
-<li>
-
-vec.size():벡터의 현재 크기<br>
-
-vec.capacity():벡터에 할당된 크기
-
-</li>
-<li>
-
-  vec.at(i), i+1번째 있는 값의 값 반환<br>
-  vec[i]:i+1번째 있는 값 반환 단 vec.at(i)와 달리 i>=vec.size()시 범위 체크 안함
-</li>
-<li>
-vec.front():앞에 있는 값 반환
-vec.back():뒤에 있는 값 반환
-
-</li>
-<li>
-  vec.resize(n):사이즈를 n으로 초기화 부족하면 0이됨
-</li>
-<li>
-  vec.shrink_to_fit():벡터의 capacity를 size로 줄임
-</li>
-<li>
-  vec.data():벡터의 첫번쨰 원소의 주소값을 의미함<br>
-  ex) vector <int> vec=3,10,8}일때 <br?
-
-
-
-</li>
-
-<li>
-
-
-  vec.push_back(x):원소 x를 뒤에 삽입함
-</li>
-<li>
-
-
-  vec.pop_back(x):뒤에 있는 원소를 제거함
-</li>
-
-<li>
-vec.erase(pos); 원하는 pos의 원소를 제거함
-</li>
-
-<li>
-vec.insert(pos,val):원하는 pos에다 val을 삽입함
-</li>
-
-<li>
-  vec.clear():벡터안에 있는 원소들을 전부 0으로 초기화
-</li>
-<li>
-  vec.swap(v1); vec에 있는 데이터를 전부 v1으로 가게
-</li>
-
-<li>
-vec.assign(n,val);
-벡터를 다시n의 크기로 재지정
-
-</li>
-
-
-
-
-
-</ol>
-
-<hr>
-<h3>deque</h3>
-<ul>
-declaration: deque<int>dq(n,val)
-  참고로 이런식으로 초기화도 가능
-<pre>
-<code>
-#include <iostream>
-#include <vector>
-#include <deque>
+}</code></pre>
+              </div>
+            </div>
+            <div>
+              <p class="label">개선(RAII: 소유권 제거)</p>
+              <div class="codewrap"><button class="copy" data-target="#good1">Copy</button>
+                <pre><code id="good1" class="language-cpp">#include &lt;iostream&gt;
 using namespace std;
 
-int main() {
-    vector<int> v = {1, 2, 3, 4, 5};
-
-    // v[1] ~ v[3] (2,3,4) 를 복사해서 deque 생성
-    deque<int> dq(v.begin() + 1, v.begin() + 4);
-
-    for (int x : dq) cout << x << " ";
-    // 출력: 2 3 4
-}
-
-
-
-</code>
-
-
-</pre>
-<li>
-  dq.size():벡터의 현재 크기<br>
-
-dq.capacity():벡터에 할당된 크기
-</li>
-<br>
-<li>
-dq.push_front(x): dq의 앞에 특정 원소 x삽입
-<br>
-dq.push_back(x);dq의 뒤에 특정원소 x삽입
-
-
-
-
-</li>
-<li>
-
-  dq.pop_front():dq의 프론트 값 제거
-  dq.pop_back():dq의 뒤의 값제거
-</li>
-<li>
-
-
-dq.insert(pos,val):dq의 pos위치에 val삽입
-<br>
-dq.erase(pos);:특정 pos에있는 값 제거
-<br>
-dq.erase(first,end):dq의 퍼스트부터 엔드에 있는 값 제거
-
-
-</li>
-
-<li>
-  dq.empty():dq가 비었으면 true값 반환 차있으면 false값 반환
-<br>
-dq.clear():dq에 있는값 제거
-
-</li>
-
-<li>
-  dq.swap(v1):v1의 값을 dq로 변환
-</li>
-
-
-
-</ul>
-
-<hr>
-<h2>list</h2>
-declaration: 
-<ol>list<int> li(n,val)='n의 크기로 val을 채운 리스트'
-<li>
-li.size():list의 현재 크기
-list.cpacity():현재 리스트에 할당된 크기
-</li>
-<li>
-li.push_front(x):리스트의 앞에 특정웒소 x 삽입
-li.push_back(x):리스크의 뒤에 특정원소 x삽입
-</li>
-<li>
-li.pop_back():리스트의 뒤에 원소 제거
-li.pop_front():리스트의 앞에 원소 x제거
-</li>
-<li>
-li.insert(pos,val)
-<br>
-li.erase(pos);
-<br>
-li.erase(firts,end)
-
-
-</li>
-<li>
-
-
-  li.clear():li에 있는 값 전부 제거
-  <br>
-  li.empty():li가 비었는지 아닌지 확인
-</li>
-
-<h4>
-list에만 있는 특별한 함수
-</h4>
-<li>
-  li.remove(val):리스트에 있는 특별한 값 지우기<br>
-  li.unique():중복함수 지우기
-  li.merge(other_list):다른 리스트와 병합
-</li>
-<li>
-  li.sort():리스트 내 원소 정렬
-</li>
-<li>
-  li.reverse():리스트 내 원소 거꾸로 뒤집음 ex: 2 3 1 -> 1 3 2"</li>
-
-
-
-
-
-</ol>
-
-
-<hr>
-
-<h2>set</h2>
-set<int>  s(n,val);
-
-
-
-  <h3>반복자</h3>
-  <hr>
-<ol>
-
-
-<pre>
-<code>
-set <int> s={30,40,50};
-  auto it=s.begin()
-
-
-</code>
-
-
-</pre>
-
-<li>
-
-s.begin()은 첫번쨰 값을 가리키는 값. 반복자임에도 포인터의 특성을 지니고 있다.
-
-<br>
-ex:cout*itendl; =>30;
-<br>
-s.end()는 마지막 원소를 가리키는 게 아님. 그마지막 값의 다음 주소를 가리킴
-아직 주소 자체 살아있기에 유효하지만 그값에 역참조를 할떄는 세그멘테이션 펄트 발생
-
-s.find(val):목표한 값을 찾으면 그 값을 가리키는 반복자 값 반환 없을 시 반복자 s.end()반환
-<br>
-ex:
-<br>
-<pre>
-  <code>
-set <int> s={30,40,50};
-  auto it=s.find(40) /*원소가 안에 있을시 그의 주소값에 맞는 반복자 반환 */
-  auto its=s.find(70) /*원소가 그안에 없으므로 s.end()값 반환  */
-
-if(it!=s.end()){
-  print(*it) /* 40반환*/
-}
-if(its!=s.end()){
-  print(*its) /* 출력안됨*/
-}
-
-
-
-
-
-  </code>
-</pre>
-
-
-</li>
-<li>
-  s.count(val):원소 val의 개수를 표시함
-<pre>
-  <code>
-set <int> s={30,40,50};
-1=s.count(30)
-
-
-0=s.count(70)
-
-
-
-  </code>
-</pre>
-
-</li>
-
-<li>
-
-  s.insert(s.begin(),val):셋의 val의 삽입 위치를 힌트를 주고 알려줌  
-</li>
-
-<li>
-  s.erase(val):특정val을 제거함
-  s.erase(s.begin(),s.end())원하는 위치 첫 시작점부터 끝까지 제거 가능하다
-</li>
-
-<li>
-  s.clear():s에 있는 데이터 전부 제거
-</li>
-<li>
-  s.empty():s가 비었으면 true 차있으면 false를 내놓는다
-</li>
-</ol>
-
-<hr>
-<h2>map</h2>
-<pre>
-<code>
-
-#include <iostream>
-#include <map>
-using namespace std;
-
-int main() {
-    map<string,int> mp;
-
-    mp.insert({"apple", 3});
-    mp.insert({"banana", 5});
-    mp.emplace("cherry", 7);
-
-    cout << "apple: " << mp["apple"] << endl;  // 3
-
-    // 이미 존재하는 키
-    auto res = mp.insert({"apple", 10});
-    cout << "apple 삽입 성공? " << (res.second ? "Yes" : "No") << endl;
-
-    // 값 수정
-    mp["apple"] = 99;
-
-    // 삭제
-    mp.erase("banana");
-
-    // 출력
-    for (auto &p : mp)
-        cout << p.first << " : " << p.second << endl;
-}
-
-
-
-
-
-
-
-
-
-</code>
-
-
-
-
-</pre>
-<h3>
-  <p>map의 선언:map<key,vale> mp;</p>
-</h3>
-
-<h3>
-  map의 삽입
-</h3>
-<pre>
-  <code>
-    mp.insert({key,value});
-
-    mp.emplace({key,value})
-  </code>
-</pre>
-
-<h3>
-  map의 삭제
-</h3>
-<pre>
-  <code>
-     map.erase(key):key로 삭제한다
-  </code>
-</pre>
-
+class Divider {
+public:
+    const int* a; const int* b; // 🔒 비소유 포인터(또는 참조 권장)
+    Divider(const int& x, const int& y): a(&x), b(&y) {}
+    int calc() const { return (*a) / (*b); }
+    // 소멸자 X: 비소유이므로 해제하지 않음
+};
+
+int main(){
+    int x, y; cin >> x >> y;
+    Divider dv(x, y);
+    cout << dv.calc() << '\n';
+}</code></pre>
+              </div>
+              <p class="note">또는 멤버를 <code>int</code> 값으로 보관(복사)하거나, <code>unique_ptr</code>로 <em>동적 할당을 직접 소유</em>할 때만 <code>delete</code>가 필요합니다.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- queue -->
+      <section id="queue" class="card">
+        <h3>queue</h3>
+        <div class="content">
+          <p><span class="label">선언</span> <code>queue&lt;T&gt; q;</code></p>
+          <div class="grid">
+            <div>
+              <dl>
+                <dt>push(x)</dt><dd>뒤에 삽입</dd>
+                <dt>pop()</dt><dd>앞에서 제거(반환값 없음 → <code>front()</code>로 먼저 확인)</dd>
+                <dt>front()</dt><dd>맨 앞 원소 참조</dd>
+                <dt>back()</dt><dd>맨 뒤 원소 참조</dd>
+                <dt>size()</dt><dd>현재 개수</dd>
+                <dt>empty()</dt><dd>비었는지 여부</dd>
+              </dl>
+            </div>
+            <div>
+              <p class="note">FIFO. 반복자, 랜덤 접근 없음. <code>deque</code> 기반 구현이 일반적.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- stack -->
+      <section id="stack" class="card">
+        <h3>stack</h3>
+        <div class="content">
+          <p><span class="label">선언</span> <code>stack&lt;int&gt; st;</code></p>
+          <div class="grid">
+            <div>
+              <dl>
+                <dt>push(x)</dt><dd>위에 삽입</dd>
+                <dt>pop()</dt><dd>맨 위 제거(반환값 없음)</dd>
+                <dt>top()</dt><dd>맨 위 원소 참조</dd>
+                <dt>size(), empty()</dt><dd>공통</dd>
+              </dl>
+            </div>
+            <div><p class="note">LIFO. 반복자 제공 안 함.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- priority_queue -->
+      <section id="pqueue" class="card">
+        <h3>priority_queue</h3>
+        <div class="content">
+          <p><span class="label">선언</span> <code>priority_queue&lt;int&gt; pq;</code> <span class="pill">기본: 최대 힙</span></p>
+          <div class="grid">
+            <div>
+              <dl>
+                <dt>push(x), pop()</dt><dd>삽입/최상위 제거</dd>
+                <dt>top()</dt><dd>최상위 원소(가장 큰 값)</dd>
+                <dt>size(), empty()</dt><dd>공통</dd>
+              </dl>
+            </div>
+            <div>
+              <p class="note">최소힙은 <code>priority_queue&lt;int, vector&lt;int&gt;, greater&lt;int&gt;&gt; pq;</code></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- vector -->
+      <section id="vector" class="card">
+        <h3>vector</h3>
+        <div class="content">
+          <p><span class="label">선언</span> <code>vector&lt;int&gt; v(n, val);</code></p>
+          <div class="grid">
+            <div>
+              <dl>
+                <dt>size(), capacity()</dt><dd>현재 크기 / 예약 용량</dd>
+                <dt>at(i), operator[]</dt><dd>경계 검사 / 비검사 접근</dd>
+                <dt>front(), back()</dt><dd>첫/끝 원소 참조</dd>
+                <dt>push_back(x), pop_back()</dt><dd>뒤 삽입/제거</dd>
+                <dt>insert(pos,val), erase(pos)</dt><dd>임의 위치 삽입/제거</dd>
+                <dt>erase(first,last)</dt><dd>구간 제거</dd>
+                <dt>resize(n), shrink_to_fit()</dt><dd>크기 조절 / 용량 정리</dd>
+                <dt>data()</dt><dd>연속 메모리 포인터</dd>
+                <dt>assign(n,val)</dt><dd>재할당 및 채우기</dd>
+                <dt>clear(), swap(v1)</dt><dd>비우기 / 교환</dd>
+              </dl>
+            </div>
+            <div>
+              <div class="codewrap"><button class="copy" data-target="#vec">Copy</button>
+                <pre><code id="vec" class="language-cpp">vector&lt;int&gt; v = {1,2,3,4,5};
+// 부분 구간으로 deque 초기화
+deque&lt;int&gt; dq(v.begin()+1, v.begin()+4); // 2 3 4</code></pre>
+              </div>
+              <p class="note">중간 삽입/삭제가 많다면 <code>list</code>나 <code>deque</code> 고려.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- deque -->
+      <section id="deque" class="card">
+        <h3>deque</h3>
+        <div class="content">
+          <p><span class="label">선언</span> <code>deque&lt;int&gt; dq(n, val);</code></p>
+          <div class="grid">
+            <div>
+              <dl>
+                <dt>push_front/back</dt><dd>양끝 삽입</dd>
+                <dt>pop_front/back</dt><dd>양끝 제거</dd>
+                <dt>insert / erase</dt><dd>임의 위치 조작(벡터보다 비용 큼)</dd>
+                <dt>size(), empty(), clear(), swap()</dt><dd>공통</dd>
+              </dl>
+            </div>
+            <div><p class="note">양끝 입출력 잦을 때 유리. 랜덤 접근 O(1).</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- list -->
+      <section id="list" class="card">
+        <h3>list</h3>
+        <div class="content">
+          <p><span class="label">선언</span> <code>list&lt;int&gt; li(n, val);</code></p>
+          <div class="grid">
+            <div>
+              <dl>
+                <dt>push_front/back, pop_front/back</dt><dd>양끝 조작</dd>
+                <dt>insert/erase</dt><dd>반복자로 O(1) 삽입/삭제</dd>
+                <dt>size(), empty(), clear()</dt><dd>공통</dd>
+                <dt>remove(val), unique(), merge(), sort(), reverse()</dt><dd><b>list 전용</b> 알고리즘</dd>
+              </dl>
+            </div>
+            <div><p class="note">연결 리스트. 랜덤 접근 불가, 캐시 친화도 낮음.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- set -->
+      <section id="set" class="card">
+        <h3>set</h3>
+        <div class="content">
+          <p><span class="label">선언</span> <code>set&lt;int&gt; s;</code> <span class="pill">정렬 · 중복 없음</span></p>
+          <div class="grid">
+            <div>
+              <dl>
+                <dt>insert(val)</dt><dd>삽입(힌트 버전: <code>insert(pos,val)</code>)</dd>
+                <dt>find(val)</dt><dd>있으면 반복자, 없으면 <code>end()</code></dd>
+                <dt>count(val)</dt><dd>0 또는 1</dd>
+                <dt>erase(val) / erase(first,last)</dt><dd>삭제</dd>
+                <dt>clear(), empty()</dt><dd>공통</dd>
+              </dl>
+            </div>
+            <div>
+              <div class="codewrap"><button class="copy" data-target="#setex">Copy</button>
+                <pre><code id="setex" class="language-cpp">set&lt;int&gt; s = {30,40,50};
+auto it = s.find(40); // 찾으면 해당 위치
+if(it != s.end()) cout &lt;&lt; *it &lt;&lt; "\n"; // 40
+</code></pre>
+              </div>
+              <p class="note"><code>end()</code>는 <em>마지막 다음</em>을 가리킴. 역참조 금지.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- map -->
+      <section id="map" class="card">
+        <h3>map</h3>
+        <div class="content">
+          <p><span class="label">선언</span> <code>map&lt;Key, T&gt; mp;</code> <span class="pill">정렬 키 · 중복 키 X</span></p>
+          <div class="grid">
+            <div>
+              <dl>
+                <dt>insert({k,v}), emplace(k,v)</dt><dd>삽입</dd>
+                <dt>operator[]</dt><dd>접근/생성(<em>주의</em>: 없으면 기본값 생성)</dd>
+                <dt>at(k)</dt><dd>존재할 때만 접근</dd>
+                <dt>erase(k)</dt><dd>키로 삭제</dd>
+                <dt>find(k)</dt><dd>위치 탐색</dd>
+                <dt>for (auto &p : mp)</dt><dd>정렬 순서로 순회</dd>
+              </dl>
+            </div>
+            <div>
+              <div class="codewrap"><button class="copy" data-target="#mapex">Copy</button>
+                <pre><code id="mapex" class="language-cpp">map&lt;string,int&gt; mp;
+mp.insert({"apple",3});
+mp.emplace("cherry",7);
+mp["apple"] = 99; // 존재 시 수정, 없으면 생성
+mp.erase("banana");
+for(auto &p: mp) cout &lt;&lt; p.first &lt;&lt; ": " &lt;&lt; p.second &lt;&lt; '\n';
+</code></pre>
+              </div>
+              <p class="note">중복 허용이 필요하면 <code>multimap</code>, 해시 기반이면 <code>unordered_map</code>.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Copy buttons
+    document.querySelectorAll('.copy').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sel = document.querySelector(btn.dataset.target);
+        if(!sel) return;
+        const text = sel.innerText.replace(/\u00A0/g,' ');
+        navigator.clipboard.writeText(text).then(()=>{
+          const old = btn.textContent; btn.textContent = 'Copied!';
+          setTimeout(()=> btn.textContent = old, 1200);
+        });
+      });
+    });
+  </script>
 </body>
 </html>

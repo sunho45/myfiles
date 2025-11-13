@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>C++ string / lambda / greater&lt;&gt; 정리</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: #111827;
+      color: #e5e7eb;
+    }
+
+    /* ==== 상태창 (status window) ==== */
+    .status-window {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      background: rgba(17, 24, 39, 0.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #374151;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .status-pill {
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: 1px solid #4b5563;
+      color: #9ca3af;
+    }
+
+    .status-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .status-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #f9fafb;
+    }
+
+    .status-sub {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .status-tags {
+      margin-left: auto;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .status-tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      color: #9ca3af;
+    }
+
+    /* ==== 본문 공통 ==== */
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 20px 20px 60px 20px;
+    }
+
+    h1, h2, h3 {
+      color: #f9fafb;
+      margin-top: 28px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-top: 24px;
+    }
+
+    h2 {
+      font-size: 22px;
+      border-bottom: 1px solid #374151;
+      padding-bottom: 4px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #e5e7eb;
+      margin: 4px 0 10px 0;
+    }
+
+    code {
+      font-family: "JetBrains Mono", Consolas, monospace;
+      background-color: #020617;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #e5e7eb;
+    }
+
+    pre {
+      background-color: #020617;
+      border-radius: 8px;
+      padding: 12px 14px;
+      overflow-x: auto;
+      font-size: 13px;
+      border: 1px solid #111827;
+      box-shadow: 0 0 0 1px #020617;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin: 6px 0 10px 0;
+      font-size: 14px;
+    }
+
+    li {
+      margin: 2px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 16px 0;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid #374151;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #111827;
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) td {
+      background-color: #020617;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .section-badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 상태창 -->
+  <div class="status-window">
+    <div class="status-pill">C++ Quick Note</div>
+    <div class="status-main">
+      <div class="status-title">std::string / lambda / greater&lt;&gt; 정리</div>
+      <div class="status-sub">C++ 문자열 함수와 정렬, 람다식, 비교자 한 번에 보기</div>
+    </div>
+    <div class="status-tags">
+      <div class="status-tag">string</div>
+      <div class="status-tag">lambda</div>
+      <div class="status-tag">greater&lt;&gt;</div>
+      <div class="status-tag">정렬</div>
+    </div>
+  </div>
+
+  <div class="page">
+    <h1>C++ string / lambda / greater&lt;&gt; 정리</h1>
+    <p>
+      이 문서는 C++에서 많이 쓰는 <code>std::string</code> 함수들과
+      <code>lambda</code>, 그리고 정렬용 비교자 <code>std::greater&lt;&gt;</code> 를
+      한 번에 정리한 치트시트 형태의 HTML입니다.
+    </p>
+
+    <!-- 1. string 관련 함수들 -->
+    <span class="section-badge">PART 1</span>
+    <h2>std::string 기본 &amp; 자주 쓰는 함수</h2>
+
+    <h3>1.1 문자열 길이 구하기</h3>
+    <table>
+      <tr>
+        <th>함수</th>
+        <th>설명</th>
+        <th>예시</th>
+      </tr>
+      <tr>
+        <td><code>size()</code></td>
+        <td>문자열 길이 반환</td>
+        <td><code>str.size()</code></td>
+      </tr>
+      <tr>
+        <td><code>length()</code></td>
+        <td><code>size()</code>와 동일</td>
+        <td><code>str.length()</code></td>
+      </tr>
+    </table>
+
+    <pre><code>// 길이 구하기 예시
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string s = "Hello World";
+    cout &lt;&lt; s.size() &lt;&lt; "\n";    // 11
+    cout &lt;&lt; s.length() &lt;&lt; "\n";  // 11
+}</code></pre>
+
+    <h3>1.2 문자열 합치기 (연결)</h3>
+    <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string a = "Hello";
+    string b = "World";
+
+    string c = a + b;   // "HelloWorld"
+    a += "!!!";         // "Hello!!!"
+
+    cout &lt;&lt; c &lt;&lt; "\n";
+    cout &lt;&lt; a &lt;&lt; "\n";
+}</code></pre>
+
+    <h3>1.3 인덱스로 문자 접근</h3>
+    <ul>
+      <li><code>str[i]</code> : 단순 인덱스 (범위 검사 X)</li>
+      <li><code>str.at(i)</code> : 범위 검사 O, 잘못된 인덱스면 예외 발생</li>
+    </ul>
+
+    <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string s = "abcde";
+    cout &lt;&lt; s[0] &lt;&lt; "\n";     // 'a'
+    cout &lt;&lt; s.at(1) &lt;&lt; "\n";   // 'b'
+}</code></pre>
+
+    <h3>1.4 부분 문자열 뽑기: substr()</h3>
+    <p><code>substr(시작인덱스, 길이)</code></p>
+    <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string s = "abcdef";
+    string t = s.substr(2, 3);  // 인덱스 2부터 3글자 → "cde"
+    cout &lt;&lt; t &lt;&lt; "\n";
+}</code></pre>
+
+    <h3>1.5 문자열 검색: find()</h3>
+    <p>
+      <code>find("패턴")</code>은 패턴이 시작되는 인덱스를 반환하고,
+      없으면 <code>string::npos</code>를 반환한다.
+    </p>
+    <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string s = "hello world";
+    size_t pos = s.find("wor");
+
+    if (pos != string::npos) {
+        cout &lt;&lt; "찾음! 위치 = " &lt;&lt; pos &lt;&lt; "\n"; // 6
+    } else {
+        cout &lt;&lt; "못 찾음\n";
+    }
+}</code></pre>
+
+    <h3>1.6 치환 / 삭제 / 삽입: replace(), erase(), insert()</h3>
+    <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string s = "abcdef";
+
+    // replace(시작, 길이, "새 문자열")
+    s.replace(1, 3, "X");   // a + X + ef  → "aXef"
+    cout &lt;&lt; s &lt;&lt; "\n";
+
+    // erase(시작, 길이)
+    s = "abcdef";
+    s.erase(2, 3);          // ab + f → "abf"
+    cout &lt;&lt; s &lt;&lt; "\n";
+
+    // insert(위치, "삽입할 문자열")
+    s = "Hello";
+    s.insert(1, "!!!");     // H + !!! + ello → "H!!!ello"
+    cout &lt;&lt; s &lt;&lt; "\n";
+}</code></pre>
+
+    <h3>1.7 문자열 정렬하기</h3>
+    <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    string s = "dcba";
+
+    sort(s.begin(), s.end());            // 오름차순: "abcd"
+    cout &lt;&lt; s &lt;&lt; "\n";
+
+    sort(s.begin(), s.end(), greater&lt;char&gt;()); // 내림차순: "dcba"
+    cout &lt;&lt; s &lt;&lt; "\n";
+}</code></pre>
+
+    <p class="note">
+      참고: <code>greater&lt;char&gt;()</code> 를 쓰면 문자 기준 “큰 순서” = 내림차순.
+    </p>
+
+    <!-- 2. lambda -->
+    <span class="section-badge">PART 2</span>
+    <h2>C++ 람다(lambda) 함수</h2>
+
+    <h3>2.1 람다 기본 형태</h3>
+    <pre><code>[캡처] (매개변수) -&gt; 반환타입 {
+    // 코드
+}</code></pre>
+
+    <pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    // x를 받아서 x*x를 반환하는 람다
+    auto square = [](int x) {
+        return x * x;
+    };
+
+    cout &lt;&lt; square(5) &lt;&lt; "\n";  // 25
+}</code></pre>
+
+    <h3>2.2 sort에서 람다로 정렬 기준 주기</h3>
+    <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; v = {5, 1, 4, 2, 3};
+
+    // 내림차순 정렬 (람다 사용)
+    sort(v.begin(), v.end(), [](int a, int b) {
+        return a &gt; b;   // a가 더 크면 앞으로
+    });
+
+    for (int x : v) cout &lt;&lt; x &lt;&lt; " ";  // 5 4 3 2 1
+    cout &lt;&lt; "\n";
+}</code></pre>
+
+    <h3>2.3 캡처 사용 예시</h3>
+    <p><code>[k]</code>는 바깥 변수 <code>k</code>를 람다 안으로 복사해서 쓰겠다는 의미.</p>
+    <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; v = {10, 11, 12, 13, 14};
+    int k = 5;
+
+    // k로 나눈 나머지 기준으로 정렬
+    sort(v.begin(), v.end(), [k](int a, int b) {
+        return (a % k) &lt; (b % k);
+    });
+
+    for (int x : v) cout &lt;&lt; x &lt;&lt; " ";
+    cout &lt;&lt; "\n";
+}</code></pre>
+
+    <p class="note">
+      캡처 문법: <code>[]</code>는 아무것도 캡처하지 않음, <code>[&amp;]</code>는 외부 변수를 참조로 캡처,
+      <code>[=]</code>는 값으로 캡처 등.
+    </p>
+
+    <!-- 3. greater -->
+    <span class="section-badge">PART 3</span>
+    <h2>std::greater&lt;&gt; 로 내림차순 정렬하기</h2>
+
+    <h3>3.1 greater&lt;&gt; 란?</h3>
+    <p>
+      <code>std::greater&lt;T&gt;</code> 는 사실상
+      <code>bool operator()(T a, T b) { return a &gt; b; }</code> 를 가지는
+      “함수 객체(functor)”이다.  
+      즉, <strong>정렬 기준을 &lt; 대신 &gt;로 바꿔주는 역할</strong>을 한다.
+    </p>
+
+    <h3>3.2 vector&lt;int&gt; 에 사용</h3>
+    <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; v = {5, 1, 4, 2, 3};
+
+    sort(v.begin(), v.end(), greater&lt;int&gt;()); // 내림차순
+
+    for (int x : v) cout &lt;&lt; x &lt;&lt; " ";  // 5 4 3 2 1
+    cout &lt;&lt; "\n";
+}</code></pre>
+
+    <h3>3.3 문자열에도 사용 가능</h3>
+    <pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    string s = "dcba";
+
+    sort(s.begin(), s.end(), greater&lt;char&gt;());
+    cout &lt;&lt; s &lt;&lt; "\n";  // "dcba" (내림차순)
+
+    return 0;
+}</code></pre>
+
+    <h3>3.4 greater vs 람다 비교</h3>
+    <table>
+      <tr>
+        <th>방법</th>
+        <th>코드</th>
+        <th>특징</th>
+      </tr>
+      <tr>
+        <td>greater&lt;&gt;</td>
+        <td><code>sort(v.begin(), v.end(), greater&lt;int&gt;());</code></td>
+        <td>숫자/문자 단순 내림차순 때 간단</td>
+      </tr>
+      <tr>
+        <td>lambda</td>
+        <td><code>sort(v.begin(), v.end(), [](int a,int b){ return a &gt; b; });</code></td>
+        <td>조건을 자유롭게 커스터마이징 가능</td>
+      </tr>
+    </table>
+
+    <p class="note">
+      단순 내림차순이면 <code>greater&lt;&gt;</code>가 더 짧고,  
+      복잡한 정렬 기준(예: 길이 우선, 그 다음 사전순 등)이 필요하면 람다를 쓰는 것이 일반적이다.
+    </p>
+  </div>
+</body>
+</html>

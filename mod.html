@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>모듈러 거듭제곱 (분할 정복 / 이진 지수법) 정리</title>
+  <style>
+    :root{
+      --bg:#0f1221; --panel:#171a2b; --text:#e6e8f2; --muted:#9aa3b2; --accent:#7aa2ff; --ok:#60d394; --warn:#ffd166; --danger:#ff6b6b;
+      --code:#0b0f1a; --border:#2a2f45;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; background:var(--bg); color:var(--text); font:16px/1.6 system-ui,Segoe UI,Roboto,Apple SD Gothic Neo,Pretendard,Arial,sans-serif}
+    a{color:var(--accent); text-decoration:none}
+    header.status{
+      position:sticky; top:0; z-index:10; backdrop-filter:saturate(1.2) blur(6px);
+      border-bottom:1px solid var(--border); background:color-mix(in srgb, var(--panel) 92%, transparent);
+    }
+    .status-inner{max-width:1100px; margin:auto; padding:12px 16px; display:grid; grid-template-columns:1.2fr 2fr 1fr; gap:12px; align-items:center}
+    .card{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:12px 14px; box-shadow:0 4px 14px rgba(0,0,0,.25)}
+    .kvs{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; font-size:14px; color:var(--muted)}
+    .kvs b{color:var(--text)}
+    .tag{display:inline-block; padding:4px 10px; border:1px solid var(--border); background:#101427; border-radius:999px; font-size:12px; color:var(--muted); margin-right:6px}
+    main{max-width:1100px; margin:20px auto; padding:0 16px 64px}
+    h1,h2,h3{line-height:1.25; margin:28px 0 12px}
+    h1{font-size:30px}
+    h2{font-size:22px; margin-top:32px}
+    section{margin-top:16px}
+    .grid{display:grid; gap:16px}
+    .two{grid-template-columns:repeat(2,minmax(0,1fr))}
+    pre{background:var(--code); color:#d8e0ff; padding:14px; border-radius:12px; overflow:auto; border:1px solid var(--border)}
+    code{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size:13.5px}
+    .note{border-left:3px solid var(--accent); padding:10px 12px; background:#101427; color:var(--muted); border-radius:8px}
+    ul{margin:8px 0 8px 18px}
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .danger{color:var(--danger)}
+    .pill{display:inline-block; padding:4px 8px; border-radius:8px; background:#101427; border:1px solid var(--border); font-size:12px; color:var(--muted)}
+    .ex{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+  </style>
+</head>
+<body>
+  <!-- 상단 고정 상태창 (사용자 선호 템플릿) -->
+  <header class="status">
+    <div class="status-inner">
+      <div class="card">
+        <div style="font-weight:700; font-size:15px; margin-bottom:6px">주제</div>
+        <div class="ex">
+          <span class="tag">모듈러 거듭제곱</span>
+          <span class="tag">이진 지수법 (Binary Exponentiation)</span>
+          <span class="tag">분할 정복</span>
+          <span class="tag">오버플로 방지</span>
+        </div>
+      </div>
+      <div class="card kvs">
+        <div><span class="muted">문제</span><br/><b>BOJ 1629 (곱셈): A^B mod C</b></div>
+        <div><span class="muted">핵심 성질</span><br/><b>(x·y) mod C = ((x mod C)·(y mod C)) mod C</b></div>
+      </div>
+      <div class="card" style="text-align:right">
+        <div><span class="pill">시간복잡도: O(log B)</span></div>
+        <div style="margin-top:6px"><span class="pill">업데이트: 2025-11-10 (KST)</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <h1>모듈러 거듭제곱 정리 (A<sup>B</sup> mod C)</h1>
+    <p>큰 지수 <b>B</b>에 대해 <b>A<sup>B</sup> mod C</b>를 빠르고 안전하게 계산하는 법을 정리했습니다. 핵심은 <b>이진 지수법</b>과 <b>곱셈 때마다 모듈러를 취해 오버플로를 막는 것</b>입니다.</p>
+
+    <h2 id="why">1) 왜 부분마다 나눠도(모듈러) 되나?</h2>
+    <div class="note">
+      모듈러의 분배 법칙: <b>(x·y) mod C = ((x mod C)·(y mod C)) mod C</b><br/>
+      더하기/빼기에도 동일하게 분배됨: (x±y) mod C = ((x mod C) ± (y mod C)) mod C
+    </div>
+    <p>
+      따라서 중간 곱셈 결과가 매우 커지기 전에 계속 <code>mod C</code>를 취해도 최종 결과와 동일합니다.
+      오히려 <b>필수</b>로 그렇게 해야 정수 오버플로를 피할 수 있습니다.
+    </p>
+
+    <h2 id="binary">2) 분할 정복 / 이진 지수법 아이디어</h2>
+    <ul>
+      <li>B가 짝수면: A<sup>B</sup> = (A<sup>B/2</sup>)<sup>2</sup></li>
+      <li>B가 홀수면: A<sup>B</sup> = (A<sup>⌊B/2⌋</sup>)<sup>2</sup>·A</li>
+    </ul>
+    <p>즉, 한 번의 재귀/반복마다 지수를 절반으로 줄입니다. 그래서 <b>O(log B)</b>에 계산이 끝납니다.</p>
+
+    <section class="grid two">
+      <div>
+        <h3>재귀 버전 (개념적)</h3>
+        <pre><code>// 오버플로 방지를 위해 곱할 때마다 128비트를 사용해 mod
+long long modpow(long long a, long long b, long long c){
+    if(b == 0) return 1 % c;
+    if(b == 1) return a % c;
+    long long half = modpow(a, b/2, c);
+    __int128 mul = (__int128)half * half % c; // (half^2) % c
+    long long res = (long long)mul;
+    if(b & 1){
+        res = (long long)(((__int128)res * (a % c)) % c);
+    }
+    return res;
+}
+</code></pre>
+      </div>
+      <div>
+        <h3>반복(이진) 버전 (실전용)</h3>
+        <pre><code>long long modpow_iter(long long a, long long b, long long c){
+    long long base = a % c;   // t
+    long long ans  = 1 % c;   // solution
+    while(b > 0){
+        if(b & 1){
+            ans = (long long)(((__int128)ans * base) % c);
+        }
+        base = (long long)(((__int128)base * base) % c); // 제곱
+        b >>= 1; // 지수를 2로 나눔
+    }
+    return ans;
+}
+</code></pre>
+      </div>
+    </section>
+
+    <h2 id="bits">3) 비트 연산 해설</h2>
+    <ul>
+      <li><code>b & 1</code>: b의 최하위 비트가 1인지 확인 → 홀수 여부 판별</li>
+      <li><code>b >>= 1</code>: b를 오른쪽으로 1비트 쉬프트 → 정수 나눗셈 <b>b = b / 2</b>와 동일</li>
+    </ul>
+
+    <h2 id="i128">4) <code>__int128</code>은 무엇이고 왜 필요한가?</h2>
+    <p>
+      C++의 확장 정수형(비표준이지만 GCC/Clang에서 제공). 128비트 정수로, <code>long long</code>(64비트)을 넘어서는 곱셈 중간값을 안전하게 담을 수 있습니다.
+      예를 들어 <code>(long long)×(long long)</code>은 곱 자체가 64비트를 넘칠 수 있으므로, 곱하는 순간 <code>__int128</code>로 캐스팅하여 <b>곧바로 mod</b>를 취해 64비트로 내려오는 패턴을 사용합니다.
+    </p>
+
+    <h2 id="correct">5) 정확성 스케치</h2>
+    <ul>
+      <li>기저: B=0이면 결과는 1, B=1이면 A mod C.</li>
+      <li>유도: B가 짝수일 때 <code>pow(A,B) = pow(A,B/2)^2</code>, 홀수일 때 <code>pow(A,B) = pow(A,⌊B/2⌋)^2·A</code>.</li>
+      <li>각 곱셈은 모듈러 분배법칙에 의해 단계마다 <code>mod C</code>를 취해도 최종 결과 보존.</li>
+      <li>매 단계에 B가 절반으로 감소 → 유한 번(≈log₂B) 후 종료.</li>
+    </ul>
+
+    <h2 id="pitfalls">6) 흔한 실수 & 주의점</h2>
+    <ul>
+      <li class="danger">❌ <b>중간 곱에서 mod를 안 함</b> → 오버플로.</li>
+      <li class="danger">❌ 재귀에서 <code>po*po*(a%c)</code>처럼 <b>모두 곱한 뒤 마지막에만 %</b> → 역시 오버플로.</li>
+      <li class="warn">⚠️ <code>long long</code>만으로 곱셈 → 캐스팅 없이 곱하면 이미 넘침.</li>
+      <li class="warn">⚠️ C가 1일 때 결과는 항상 0 → <code>1 % c</code> 형태로 안전 처리.</li>
+    </ul>
+
+    <h2 id="example">7) 예시 테스트</h2>
+    <div class="grid two">
+      <div class="card">
+        <b>입력</b>
+        <pre><code>10 11 12</code></pre>
+      </div>
+      <div class="card">
+        <b>출력</b>
+        <pre><code>4</code></pre>
+      </div>
+    </div>
+
+    <h2 id="full">8) 전체 예시 코드 (반복 버전 권장)</h2>
+    <pre><code>#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+long long modpow_iter(long long a, long long b, long long c){
+    long long base = a % c;
+    long long ans  = 1 % c;
+    while(b > 0){
+        if(b & 1){
+            ans = (long long)(((__int128)ans * base) % c);
+        }
+        base = (long long)(((__int128)base * base) % c);
+        b >>= 1;
+    }
+    return ans;
+}
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    long long A,B,C; 
+    if(!(cin >> A >> B >> C)) return 0;
+    cout << modpow_iter(A,B,C) << "\n";
+    return 0;
+}
+</code></pre>
+
+    <h2 id="qa">9) Q&A 짧은 복습</h2>
+    <ul>
+      <li><b>Q.</b> "다 곱한 값을 마지막에 한 번만 나눠도 되지 않나?"<br/>
+          <b>A.</b> 이론적으로는 동일 결과지만, <u>중간 값이 64비트를 넘쳐서</u> 실제 코드는 무너집니다. 그래서 곱할 때마다 mod를 취합니다.</li>
+      <li><b>Q.</b> <code>b & 1</code>은? → b가 홀수인지 검사.</li>
+      <li><b>Q.</b> <code>b >>= 1</code>은? → b = b / 2 (정수 나눗셈).</li>
+      <li><b>Q.</b> <code>__int128</code>은? → 128비트 정수(확장형). 곱셈 중간값을 안전히 담은 뒤 mod로 줄이는 용도.</li>
+    </ul>
+
+    <h2 id="complexity">10) 복잡도</h2>
+    <ul>
+      <li>시간: O(log B)</li>
+      <li>공간: O(1) (반복 버전) / O(log B) (재귀 호출 스택)</li>
+    </ul>
+
+    <p style="margin-top:32px;color:var(--muted)">끝. 빠른 거듭제곱 패턴만 몸에 익히면 대부분의 모듈러 연산 문제가 풀립니다 👍</p>
+  </main>
+</body>
+</html>

@@ -1,8 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
+    
+    
+    
+    
+    <style>
+        *{
+            text-decoration: dotted;
+            color:red;
+        }
+
+        div > p{
+            color:blue;
+
+        }
+
+         div p{
+            color:blue;
+
+        }
+        
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" ,content="width=device-width, initial-scale=1">
+    
+
 </head>
 
 <body>
@@ -107,6 +130,104 @@ source: 다양한 형식 지정
 <li>
     poster="thumnail.jpg":동영상 썸네일 지정
 </li>
+
+<hr>
+
+<h1>
+    css 문법
+</h1>
+전속성
+<blockquote>
+*{
+<br>속성 ex:color:red
+<br>
+}
+</blockquote>
+
+속성 태그
+<blockquote>
+p{
+<br>속성 ex:color:red
+<br>
+}
+</blockquote>
+관련 태그에만 속성 부여
+
+
+<br>
+클래스 태그
+<blockquote>
+.클래스이름{
+<br>속성 
+<br>
+}
+</blockquote>
+
+class="color"에만 속성부여
+id태그
+<blockquote>
+#클래스이름{
+<br>속성 
+<br>
+}
+</blockquote>
+
+id="color"에만 속성부여, 여러번 쓸 수 없으며 클래스와 달리 중복활용이 불가능하다.
+<br>
+<br>
+div > p:div의 직계 p에만 적용
+
+
+example: ()
+
+<blockquote>
+  div > p{
+            color:blue;
+
+        }
+        
+<div>
+<p>
+
+    hello
+</p>
+
+
+
+</div>
+
+
+
+</blockquote>
+<br>
+<div>
+<p>
+
+    hello div->p이므로 직계성립
+
+    
+</p>
+
+<form>
+    <p>
+        ㅇㄷㄷ 이거는 div-> form-> p이므로 직계 성립안됨     #
+    </p>
+</form>
+
+</div>
+
+
+
+
+
+
+
+<br>
+
+
+
+
+
 
 
 
